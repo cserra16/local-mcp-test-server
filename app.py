@@ -1,4 +1,6 @@
 import httpx
+from datetime import datetime
+from zoneinfo import ZoneInfo
 from mcp.server.fastmcp import FastMCP
 
 # Inicializar FastMCP con el nombre del servicio
@@ -176,6 +178,60 @@ async def get_weather_lhospitalet() -> str:
              porcentaje de humedad relativa y estado del cielo.
     """
     return await get_weather("lhospitalet")
+
+
+@mcp.tool()
+async def get_time(city: str = "madrid") -> str:
+    """
+    Obtiene la hora actual en una ciudad específica.
+
+    Args:
+        city: Nombre de la ciudad (opciones disponibles: lhospitalet, barcelona,
+              madrid, valencia, sevilla, bilbao, malaga, zaragoza).
+              Por defecto: madrid
+
+    Returns:
+        str: Hora actual en la zona horaria de la ciudad seleccionada,
+             incluyendo fecha y hora en formato legible.
+
+    Examples:
+        - "¿Qué hora es?"
+        - "¿Qué hora es en Barcelona?"
+        - "Hora actual en Madrid"
+        - "Dame la hora de Valencia"
+    """
+    # Normalizar el nombre de la ciudad
+    city_key = city.lower().strip()
+
+    # Buscar la ciudad en el diccionario
+    if city_key not in CITIES:
+        available_cities = ", ".join([CITIES[k]["name"] for k in CITIES.keys()])
+        return f"Ciudad '{city}' no encontrada. Ciudades disponibles: {available_cities}"
+
+    city_data = CITIES[city_key]
+
+    try:
+        # Obtener la hora actual en la zona horaria de la ciudad
+        tz = ZoneInfo(city_data["timezone"])
+        now = datetime.now(tz)
+
+        # Nombres de los días en español
+        dias_semana = [
+            "lunes", "martes", "miércoles", "jueves",
+            "viernes", "sábado", "domingo"
+        ]
+        dia_semana = dias_semana[now.weekday()]
+
+        # Formatear la fecha y hora
+        fecha_formateada = now.strftime("%d/%m/%Y")
+        hora_formateada = now.strftime("%H:%M:%S")
+
+        return (
+            f"Hora en {city_data['name']}: {dia_semana}, {fecha_formateada} a las {hora_formateada} "
+            f"(Zona horaria: {city_data['timezone']})"
+        )
+    except Exception as e:
+        return f"Error al obtener la hora: {str(e)}"
 
 
 def main():

@@ -1,11 +1,12 @@
 # Local MCP Test Server
 
-Servidor MCP (Model Context Protocol) de pruebas locales que expone herramientas meteorológicas para múltiples ciudades mediante transporte SSE, compatible con dispositivos móviles (iOS/Android).
+Servidor MCP (Model Context Protocol) de pruebas locales que expone herramientas meteorológicas y de hora para múltiples ciudades mediante transporte SSE, compatible con dispositivos móviles (iOS/Android).
 
 ## Características
 
 - **Transporte SSE** para conexión desde apps móviles en red local
 - **API Open-Meteo** (gratuita, sin API key)
+- **Herramientas de hora** con soporte de zonas horarias
 - **FastMCP** para registro automático de herramientas
 - **Compatible con Qwen 2.5** y otros LLMs
 
@@ -103,6 +104,29 @@ Obtiene el clima actual de L'Hospitalet de Llobregat (Barcelona). Esta herramien
 Clima en L'Hospitalet de Llobregat: 18.5°C, Humedad: 65%, Estado del cielo: Parcialmente nublado. Datos provistos por Open-Meteo.
 ```
 
+### `get_time`
+
+Obtiene la hora actual en una ciudad específica.
+
+**Parámetros:**
+- `city` (string, opcional): Nombre de la ciudad. Por defecto: `madrid`
+
+**Ciudades disponibles:** (las mismas que para `get_weather`)
+- `lhospitalet`, `barcelona`, `madrid`, `valencia`, `sevilla`, `bilbao`, `malaga`, `zaragoza`
+
+**Retorna:** Fecha y hora actual en la zona horaria de la ciudad seleccionada.
+
+**Ejemplos de uso:**
+- "¿Qué hora es?"
+- "¿Qué hora es en Barcelona?"
+- "Hora actual en Madrid"
+- "Dame la hora de Valencia"
+
+**Ejemplo de respuesta:**
+```
+Hora en Barcelona: miércoles, 08/01/2026 a las 14:30:45 (Zona horaria: Europe/Madrid)
+```
+
 ## Pruebas
 
 ### Con MCP Inspector (recomendado)
@@ -131,7 +155,15 @@ async def test():
             result = await session.call_tool('get_weather', {'city': 'madrid'})
             print(result.content[0].text)
 
-            # Ejemplo 3: Usando la herramienta legacy
+            # Ejemplo 3: Consultar hora en Barcelona
+            result = await session.call_tool('get_time', {'city': 'barcelona'})
+            print(result.content[0].text)
+
+            # Ejemplo 4: Consultar hora (por defecto Madrid)
+            result = await session.call_tool('get_time', {})
+            print(result.content[0].text)
+
+            # Ejemplo 5: Usando la herramienta legacy
             result = await session.call_tool('get_weather_lhospitalet', {})
             print(result.content[0].text)
 
