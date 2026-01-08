@@ -1,6 +1,6 @@
 # Local MCP Test Server
 
-Servidor MCP (Model Context Protocol) de pruebas locales que expone herramientas meteorológicas mediante transporte SSE, compatible con dispositivos móviles (iOS/Android).
+Servidor MCP (Model Context Protocol) de pruebas locales que expone herramientas meteorológicas para múltiples ciudades mediante transporte SSE, compatible con dispositivos móviles (iOS/Android).
 
 ## Características
 
@@ -56,9 +56,38 @@ El servidor iniciará en `http://0.0.0.0:8000` con transporte SSE.
 
 ## Herramientas Disponibles
 
+### `get_weather`
+
+Obtiene el clima actual de una ciudad específica (generalizada).
+
+**Parámetros:**
+- `city` (string): Nombre de la ciudad
+
+**Ciudades disponibles:**
+- `lhospitalet` - L'Hospitalet de Llobregat
+- `barcelona` - Barcelona
+- `madrid` - Madrid
+- `valencia` - Valencia
+- `sevilla` - Sevilla
+- `bilbao` - Bilbao
+- `malaga` - Málaga
+- `zaragoza` - Zaragoza
+
+**Retorna:** Temperatura (°C), humedad relativa (%) y estado del cielo.
+
+**Ejemplos de uso:**
+- "¿Qué tiempo hace en Barcelona?"
+- "Clima de Madrid"
+- "Temperatura en Valencia"
+
+**Ejemplo de respuesta:**
+```
+Clima en Barcelona: 18.5°C, Humedad: 65%, Estado del cielo: Parcialmente nublado. Datos provistos por Open-Meteo.
+```
+
 ### `get_weather_lhospitalet`
 
-Obtiene el clima actual de L'Hospitalet de Llobregat (Barcelona).
+Obtiene el clima actual de L'Hospitalet de Llobregat (Barcelona). Esta herramienta es un wrapper de compatibilidad que utiliza internamente `get_weather`.
 
 **Triggers:** El LLM invocará esta herramienta cuando el usuario pregunte por el clima en:
 - L'Hospitalet de Llobregat
@@ -93,6 +122,16 @@ async def test():
     async with sse_client('http://localhost:8000/sse') as (read, write):
         async with ClientSession(read, write) as session:
             await session.initialize()
+
+            # Ejemplo 1: Consultar clima de Barcelona
+            result = await session.call_tool('get_weather', {'city': 'barcelona'})
+            print(result.content[0].text)
+
+            # Ejemplo 2: Consultar clima de Madrid
+            result = await session.call_tool('get_weather', {'city': 'madrid'})
+            print(result.content[0].text)
+
+            # Ejemplo 3: Usando la herramienta legacy
             result = await session.call_tool('get_weather_lhospitalet', {})
             print(result.content[0].text)
 
