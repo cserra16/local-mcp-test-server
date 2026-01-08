@@ -27,7 +27,7 @@ Servidor MCP (Model Context Protocol) de pruebas locales que expone herramientas
 
 ```bash
 # Clonar repositorio
-git clone https://github.com/<usuario>/local-mcp-test-server.git
+git clone https://github.com/cserra16/local-mcp-test-server.git
 cd local-mcp-test-server
 
 # Crear entorno virtual
